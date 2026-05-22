@@ -1,61 +1,59 @@
 package com.mediexpress.login.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.mediexpress.login.model.UsuarioLogin;
 import com.mediexpress.login.service.UsuarioLoginService;
+import com.mediexpress.login.util.JwtUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/login")
-@Tag(name = "Usuarios Login", description = "API para gestión de usuarios de login")
+@Tag(name = "Login", description = "Autenticación y gestión de usuarios")
 public class UsuarioLoginController {
+
     @Autowired
     private UsuarioLoginService service;
 
-    @Operation(summary = "Registrar un nuevo usuario",
-               responses = {
-                   @ApiResponse(responseCode = "200", description = "Usuario registrado correctamente"),
-                   @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content)
-               })
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Operation(summary = "Registrar un nuevo usuario")
     @PostMapping("/registrar")
-    public ResponseEntity<UsuarioLogin> registrar(@RequestBody UsuarioLogin usuario) {
-        return ResponseEntity.ok(service.registrar(usuario));
+    public ResponseEntity<?> registrar(@RequestBody UsuarioLogin usuario) {
+        try {
+            return ResponseEntity.ok(service.registrar(usuario));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    @Operation(summary = "Iniciar sesión con correo y contraseña",
-               responses = {
-                   @ApiResponse(responseCode = "200", description = "Inicio de sesión exitoso"),
-                   @ApiResponse(responseCode = "401", description = "Credenciales incorrectas", content = @Content)
-               })
+    @Operation(summary = "Iniciar sesión — devuelve token JWT")
     @PostMapping("/iniciar")
     public ResponseEntity<?> login(
-        @Parameter(description = "Correo del usuario", example = "usuario@ejemplo.com")
-        @RequestParam String correo,
-        @Parameter(description = "Contraseña del usuario", example = "123456")
-        @RequestParam String contraseña) {
-        
+            @Parameter(description = "Correo del usuario") @RequestParam String correo,
+            @Parameter(description = "Contraseña del usuario") @RequestParam String contraseña) {
+
         return service.login(correo, contraseña)
-            .<ResponseEntity<?>>map(ResponseEntity::ok)
-            .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales incorrectas"));
+                .map(usuario -> {
+                    String token = jwtUtil.generarToken(usuario.getCorreo(), usuario.getRol());
+                    Map<String, Object> respuesta = new HashMap<>();
+                    respuesta.put("token", token);
+                    respuesta.put("usuario", usuario);
+                    return ResponseEntity.ok(respuesta);
+                })
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Credenciales incorrectas")));
     }
 
     @Operation(summary = "Listar todos los usuarios")
@@ -64,32 +62,20 @@ public class UsuarioLoginController {
         return ResponseEntity.ok(service.listar());
     }
 
-    @Operation(summary = "Actualizar un usuario por ID",
-               responses = {
-                   @ApiResponse(responseCode = "200", description = "Usuario actualizado correctamente"),
-                   @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content)
-               })
+    @Operation(summary = "Actualizar usuario por ID")
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioLogin> actualizar(
-        @Parameter(description = "ID del usuario a actualizar", example = "1")
-        @PathVariable Long id,
-        @RequestBody UsuarioLogin usuario) {
-        
-        return ResponseEntity.ok(service.actualizar(id, usuario));
+    public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody UsuarioLogin usuario) {
+        try {
+            return ResponseEntity.ok(service.actualizar(id, usuario));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    @Operation(summary = "Eliminar un usuario por ID",
-               responses = {
-                   @ApiResponse(responseCode = "204", description = "Usuario eliminado correctamente"),
-                   @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content)
-               })
+    @Operation(summary = "Eliminar usuario por ID")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(
-        @Parameter(description = "ID del usuario a eliminar", example = "1")
-        @PathVariable Long id) {
-        
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         service.eliminar(id);
         return ResponseEntity.noContent().build();
     }
-    
 }
