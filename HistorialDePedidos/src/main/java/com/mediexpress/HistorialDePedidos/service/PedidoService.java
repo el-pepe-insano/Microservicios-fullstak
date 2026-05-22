@@ -3,12 +3,13 @@ package com.mediexpress.HistorialDePedidos.service;
 import java.util.List;
 import java.util.Optional;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.mediexpress.HistorialDePedidos.model.Pedido;
+import com.mediexpress.HistorialDePedidos.model.Usuario;
 import com.mediexpress.HistorialDePedidos.repository.PedidoRepository;
+import com.mediexpress.HistorialDePedidos.service.UsuarioClienteService;
 
 @Service
 public class PedidoService {
@@ -16,12 +17,13 @@ public class PedidoService {
     @Autowired
     private PedidoRepository repo;
 
-    // Listar todos los pedidos
+    @Autowired
+    private UsuarioClienteService usuarioClienteService;
+
     public List<Pedido> listarTodos() {
         return repo.findAll();
     }
 
-    // Obtener pedido por ID con validación
     public Optional<Pedido> obtenerPorId(Long id) {
         if (id == null || id <= 0) {
             throw new RuntimeException("El ID del pedido no es válido.");
@@ -29,18 +31,30 @@ public class PedidoService {
         return repo.findById(id);
     }
 
-    // Crear nuevo pedido
     public Pedido guardar(Pedido pedido) {
+        // Validación cruzada: verificar que el usuario existe en microservicio Usuarios
+        Usuario usuario = usuarioClienteService
+                .obtenerUsuarioPorId(pedido.getIdCliente()).block();
+        if (usuario == null) {
+            throw new RuntimeException("El usuario con ID " + pedido.getIdCliente()
+                    + " no existe.");
+        }
+
+        if (pedido.getTotal() == null || pedido.getTotal() <= 0) {
+            throw new RuntimeException("El total del pedido debe ser mayor a 0.");
+        }
+
         return repo.save(pedido);
     }
 
-    // Actualizar pedido (asegura que se actualice el pedido correcto)
     public Pedido actualizar(Long id, Pedido pedido) {
+        if (!repo.existsById(id)) {
+            throw new RuntimeException("El pedido con ID " + id + " no existe.");
+        }
         pedido.setId(id);
         return repo.save(pedido);
     }
 
-    // Eliminar pedido con validación
     public void eliminar(Long id) {
         if (!repo.existsById(id)) {
             throw new RuntimeException("El pedido con ID " + id + " no existe.");
