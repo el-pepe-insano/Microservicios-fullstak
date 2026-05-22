@@ -1,5 +1,5 @@
 ﻿package com.Mediexpress.CarritoDeCompras.security;
-import com.Mediexpress.CarritoDeCompras.util.JwtUtil;
+import com.Mediexpress.CarritoDeCompras.security.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,3 +32,4 @@ public class JwtFilter extends OncePerRequestFilter {
         chain.doFilter(req, res);
     }
 }
+

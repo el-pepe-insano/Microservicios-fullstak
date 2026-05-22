@@ -1,5 +1,4 @@
-﻿package com.mediexpress.HistorialDePedidos.security;
-import com.mediexpress.HistorialDePedidos.security.JwtUtil;
+﻿package com.Mediexpress.usuarios.security;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,4 +31,3 @@ public class JwtFilter extends OncePerRequestFilter {
         chain.doFilter(req, res);
     }
 }
-

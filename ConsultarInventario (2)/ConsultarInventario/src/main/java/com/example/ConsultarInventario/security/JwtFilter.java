@@ -1,5 +1,5 @@
 ﻿package com.example.ConsultarInventario.security;
-import com.example.ConsultarInventario.util.JwtUtil;
+import com.example.ConsultarInventario.security.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,3 +32,4 @@ public class JwtFilter extends OncePerRequestFilter {
         chain.doFilter(req, res);
     }
 }
+

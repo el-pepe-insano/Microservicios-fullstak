@@ -1,5 +1,5 @@
 ﻿package com.example.ResenasYcalificaciones.security;
-import com.example.ResenasYcalificaciones.util.JwtUtil;
+import com.example.ResenasYcalificaciones.security.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,3 +32,4 @@ public class JwtFilter extends OncePerRequestFilter {
         chain.doFilter(req, res);
     }
 }
+

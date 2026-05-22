@@ -1,4 +1,4 @@
-﻿package com.mediexpress.HistorialDePedidos.util;
+﻿package com.example.ResenasYcalificaciones.security;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,3 +20,4 @@ public class JwtUtil {
         catch (Exception e) { return false; }
     }
 }
+
