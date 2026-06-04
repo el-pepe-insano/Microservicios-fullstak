@@ -1,69 +1,63 @@
-package com.GodOfGames.Usuarios.Z.controllers;
-
+﻿package com.GodOfGames.Usuarios.Z.controllers;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import com.GodOfGames.Usuarios.Z.Service.UsuarioService;
-import com.GodOfGames.Usuarios.Z.config.JwtUtil;
 import com.GodOfGames.Usuarios.Z.models.Usuario;
-import java.util.HashMap;
-import java.util.Map;
-
-@RestController
-@RequestMapping("/api/usuarios")
-@Slf4j
+import com.GodOfGames.Usuarios.Z.security.JwtUtil;
+import java.util.*;
+@RestController @RequestMapping("/api/usuarios") @Slf4j
+@Tag(name = "Usuarios", description = "Gestión de usuarios y autenticación - MediExpress")
 public class UsuarioController {
-
     private final UsuarioService usuarioService;
-    private final JwtUtil jwtUtil; // Inyectamos nuestra fábrica de tokens
-
+    private final JwtUtil jwtUtil;
     public UsuarioController(UsuarioService usuarioService, JwtUtil jwtUtil) {
-        this.usuarioService = usuarioService;
-        this.jwtUtil = jwtUtil;
+        this.usuarioService = usuarioService; this.jwtUtil = jwtUtil;
     }
-
-    // Agregamos @Valid para que Spring Boot verifique las reglas del modelo antes de procesar
-    @PostMapping("/registro")
-    public ResponseEntity<Usuario> registrar(@Valid @RequestBody Usuario usuario) {
-        log.info("Petición HTTP POST recibida en /api/usuarios/registro");
-        Usuario nuevoUsuario = usuarioService.registrarUsuario(usuario);
-        nuevoUsuario.setContraseña(null); 
-        return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
+    @Operation(summary = "Registrar nuevo usuario") @PostMapping("/registro")
+    public ResponseEntity<?> registrar(@Valid @RequestBody Usuario usuario) {
+        try {
+            Usuario nuevo = usuarioService.registrarUsuario(usuario);
+            nuevo.setContraseña(null);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevo);
+        } catch (RuntimeException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
     }
-
-    @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestParam String correo, @RequestParam String contraseña) {
-        log.info("Petición HTTP POST recibida en /api/usuarios/login");
-        Usuario usuarioAutenticado = usuarioService.iniciarSesion(correo, contraseña);
-        
-        // Generamos el pase VIP
-        String token = jwtUtil.generarToken(usuarioAutenticado);
-        usuarioAutenticado.setContraseña(null); 
-        
-        // Devolvemos el usuario y su Token
-        Map<String, Object> respuesta = new HashMap<>();
-        respuesta.put("mensaje", "Bienvenido a GodOfGames, señor.");
-        respuesta.put("token", token);
-        respuesta.put("usuario", usuarioAutenticado);
-        
-        return ResponseEntity.ok(respuesta);
+    @Operation(summary = "Login — devuelve token JWT") @PostMapping("/login")
+    public ResponseEntity<?> login(
+            @Parameter(description = "Correo") @RequestParam String correo,
+            @Parameter(description = "Contraseña") @RequestParam String contraseña) {
+        return usuarioService.login(correo, contraseña).map(u -> {
+            String token = jwtUtil.generarToken(u.getCorreo(), u.getRol().name());
+            u.setContraseña(null);
+            Map<String,Object> r = new HashMap<>(); r.put("token",token); r.put("usuario",u);
+            return ResponseEntity.ok(r);
+        }).orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error","Credenciales incorrectas")));
     }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Usuario> actualizar(@PathVariable Long id, @Valid @RequestBody Usuario usuario) {
-        log.info("Petición HTTP PUT recibida en /api/usuarios/{}", id);
-        Usuario usuarioActualizado = usuarioService.actualizarUsuario(id, usuario);
-        usuarioActualizado.setContraseña(null);
-        return ResponseEntity.ok(usuarioActualizado);
+    @Operation(summary = "Listar todos los usuarios") @GetMapping
+    public ResponseEntity<List<Usuario>> listar() {
+        List<Usuario> lista = usuarioService.listarUsuarios();
+        lista.forEach(u -> u.setContraseña(null));
+        return ResponseEntity.ok(lista);
     }
-    @GetMapping
-    public ResponseEntity<Iterable<Usuario>> listarTodos() {
-        log.info("Petición HTTP GET recibida en /api/usuarios para listar todos");
-        Iterable<Usuario> usuarios = usuarioService.listarUsuarios();
-        // Opcional: limpiar contraseñas por seguridad
-        usuarios.forEach(u -> u.setContraseña(null));
-        return ResponseEntity.ok(usuarios);
+    @Operation(summary = "Buscar usuario por ID") @GetMapping("/{id}")
+    public ResponseEntity<?> buscarPorId(@PathVariable Long id) {
+        return usuarioService.buscarPorId(id).map(u -> { u.setContraseña(null); return ResponseEntity.ok(u); })
+                .orElse(ResponseEntity.notFound().build());
+    }
+    @Operation(summary = "Actualizar usuario por ID") @PutMapping("/{id}")
+    public ResponseEntity<?> actualizar(@PathVariable Long id, @Valid @RequestBody Usuario usuario) {
+        try {
+            Usuario a = usuarioService.actualizarUsuario(id, usuario); a.setContraseña(null);
+            return ResponseEntity.ok(a);
+        } catch (RuntimeException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
+    }
+    @Operation(summary = "Eliminar usuario por ID") @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminar(@PathVariable Long id) {
+        try { usuarioService.eliminarUsuario(id); return ResponseEntity.noContent().build(); }
+        catch (RuntimeException e) { return ResponseEntity.badRequest().body(Map.of("error", e.getMessage())); }
     }
 }

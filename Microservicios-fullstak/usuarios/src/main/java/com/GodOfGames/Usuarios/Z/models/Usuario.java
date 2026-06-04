@@ -1,38 +1,22 @@
-package com.GodOfGames.Usuarios.Z.models;
-
+﻿package com.GodOfGames.Usuarios.Z.models;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
-
-@Entity
-@Table(name = "usuarios")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Entity @Table(name = "usuarios") @Data @NoArgsConstructor @AllArgsConstructor @Builder
+@Schema(description = "Entidad que representa un usuario del sistema MediExpress")
 public class Usuario {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @NotBlank(message = "El nombre es obligatorio, señor.")
-    @Column(nullable = false)
+    @NotBlank(message = "El nombre es obligatorio.") @Column(nullable = false)
     private String nombre;
-
-    @NotBlank(message = "El correo es obligatorio.")
-    @Email(message = "El formato del correo electrónico no es válido.")
-    @Column(nullable = false, unique = true)
+    @NotBlank @Email @Column(nullable = false, unique = true)
     private String correo;
-
-    @NotBlank(message = "La contraseña es obligatoria.")
-    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres por seguridad.")
-    @Column(nullable = false)
+    @NotBlank @Size(min = 6) @Column(nullable = false)
     private String contraseña;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Enumerated(EnumType.STRING) @Column(nullable = false)
+    @Schema(description = "Rol: ADMIN, CLIENTE, OPERADOR", example = "CLIENTE")
     private Rol rol;
+    @Column(nullable = false)
+    private boolean activo = true;
 }
