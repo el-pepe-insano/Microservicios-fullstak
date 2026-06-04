@@ -1,4 +1,3 @@
-
 package com.Mediexpress.CarritoDeCompras.service;
 
 import java.util.List;
@@ -51,9 +50,22 @@ public class CarritoServicio {
     }
 
     public CarritoItem actualizar(CarritoItem item) {
+        if (item.getCantidad() <= 0) {
+            throw new RuntimeException("La cantidad debe ser mayor a 0.");
+        }
         if (item.getCantidad() > 100) {
             throw new RuntimeException("La cantidad no puede ser mayor a 100.");
         }
+
+        // Validar también el stock cuando el cliente actualiza la cantidad en su carrito
+        Producto producto = inventarioClienteService.obtenerProducto(item.getIdProducto());
+        if (producto == null) {
+            throw new RuntimeException("El producto con ID " + item.getIdProducto() + " no existe.");
+        }
+        if (producto.getCantidad() < item.getCantidad()) {
+            throw new RuntimeException("Stock insuficiente para actualizar. Disponible: " + producto.getCantidad());
+        }
+
         return repositorio.save(item);
     }
 

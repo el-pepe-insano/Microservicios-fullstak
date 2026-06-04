@@ -1,4 +1,5 @@
 ﻿package com.example.ConsultarInventario.config;
+
 import com.example.ConsultarInventario.security.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -10,20 +11,29 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Configuration @EnableWebSecurity
+@Configuration
+@EnableWebSecurity
 public class SecurityConfig {
-    @Autowired private JwtFilter jwtFilter;
+
+    @Autowired 
+    private JwtFilter jwtFilter;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(c -> c.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/doc/**","/v3/api-docs/**","/swagger-ui/**").permitAll()
-                .requestMatchers(HttpMethod.GET,"/productos/**").hasAnyRole("ADMIN","OPERADOR","CLIENTE")
-                .requestMatchers(HttpMethod.POST,"/productos/**").hasAnyRole("ADMIN","OPERADOR")
-                .requestMatchers(HttpMethod.DELETE,"/productos/**").hasRole("ADMIN")
-                .anyRequest().authenticated())
+                .requestMatchers("/doc/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+                
+                // Aquí está la magia: Agregamos "/productos" y "/productos/**"
+                .requestMatchers(HttpMethod.GET, "/productos", "/productos/**").hasAnyRole("ADMIN", "OPERADOR", "CLIENTE")
+                .requestMatchers(HttpMethod.POST, "/productos", "/productos/**").hasAnyRole("ADMIN", "OPERADOR")
+                .requestMatchers(HttpMethod.DELETE, "/productos", "/productos/**").hasRole("ADMIN")
+                
+                .anyRequest().authenticated()
+            )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+            
         return http.build();
     }
 }
