@@ -1,4 +1,4 @@
-package com.Mediexpress.CarritoDeCompras.model;
+ackage com.Mediexpress.CarritoDeCompras.model;
 
 
 
@@ -19,12 +19,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "Carrito_Item")
-@Schema(description = "Entidad que representa un ítem dentro del carrito de compras")
+@Schema(description = "Entidad que representa un Ã­tem dentro del carrito de compras")
 public class CarritoItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Schema(description = "ID único del ítem en el carrito", example = "1")
+    @Schema(description = "ID Ãºnico del Ã­tem en el carrito", example = "1")
     private Long id;
 
     @Column(nullable = false)

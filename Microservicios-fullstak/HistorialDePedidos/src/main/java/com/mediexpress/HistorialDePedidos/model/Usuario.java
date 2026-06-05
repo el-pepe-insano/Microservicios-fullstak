@@ -1,15 +1,10 @@
-package com.mediexpress.HistorialDePedidos.model;
-
+﻿package com.mediexpress.HistorialDePedidos.model;
 import lombok.Data;
-
 @Data
 public class Usuario {
-    private Long idUsuario;
-    private String nombreUsuario;
-    private String contraseña;
+    private Long id;
+    private String nombre;
     private String correo;
-    private boolean disponible;
     private String rol;
+    private boolean activo;
 }
-
-

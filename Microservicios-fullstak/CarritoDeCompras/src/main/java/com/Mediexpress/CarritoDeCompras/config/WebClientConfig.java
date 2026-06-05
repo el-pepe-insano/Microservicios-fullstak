@@ -1,4 +1,4 @@
-package com.Mediexpress.CarritoDeCompras.config;
+ackage com.Mediexpress.CarritoDeCompras.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

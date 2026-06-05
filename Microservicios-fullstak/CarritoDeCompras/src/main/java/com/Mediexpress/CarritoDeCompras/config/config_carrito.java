@@ -1,4 +1,4 @@
-package com.Mediexpress.CarritoDeCompras.config;
+ackage com.Mediexpress.CarritoDeCompras.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +14,7 @@ public class config_carrito {
         return new OpenAPI()
                 .info(new Info()
                         .title("API de Carrito de Compras - MediExpress")
-                        .description("Servicio para la gestión del carrito de compras, incluyendo productos agregados por cliente.")
+                        .description("Servicio para la gestiÃ³n del carrito de compras, incluyendo productos agregados por cliente.")
                         .version("1.0")
                         .contact(new Contact()
                                 .name("Equipo MediExpress")

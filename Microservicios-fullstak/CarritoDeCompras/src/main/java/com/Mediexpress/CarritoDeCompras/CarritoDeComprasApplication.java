@@ -1,4 +1,4 @@
-package com.Mediexpress.CarritoDeCompras;
+ackage com.Mediexpress.CarritoDeCompras;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

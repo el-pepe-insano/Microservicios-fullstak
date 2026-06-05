@@ -1,4 +1,4 @@
-package com.Mediexpress.CarritoDeCompras.controller;
+ackage com.Mediexpress.CarritoDeCompras.controller;
 
 import java.util.List;
 
@@ -22,33 +22,33 @@ public class CarritoControlador {
     @Autowired
     private CarritoServicio servicio;
 
-    @Operation(summary = "Agregar un ítem al carrito")
+    @Operation(summary = "Agregar un Ã­tem al carrito")
     @ApiResponses({
-        @ApiResponse(responseCode = "201", description = "Ítem agregado exitosamente"),
-        @ApiResponse(responseCode = "400", description = "Error al agregar el ítem")
+        @ApiResponse(responseCode = "201", description = "Ãtem agregado exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Error al agregar el Ã­tem")
     })
     @PostMapping
-    public ResponseEntity<?> agregar(@RequestBody CarritoItem item) {
+    public ResponseEntity<?> agregar(
+            @RequestBody CarritoItem item,
+            @RequestHeader("Authorization") String token) {
         try {
-            CarritoItem guardado = servicio.agregar(item);
-            return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
+            return ResponseEntity.status(HttpStatus.CREATED).body(servicio.agregar(item, token));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @Operation(summary = "Obtener los ítems del carrito por ID de cliente")
-    @ApiResponse(responseCode = "200", description = "Ítems encontrados o lista vacía")
+    @Operation(summary = "Obtener los Ã­tems del carrito por ID de cliente")
+    @ApiResponse(responseCode = "200", description = "Ãtems encontrados o lista vacÃ­a")
     @GetMapping("/cliente/{idCliente}")
     public ResponseEntity<List<CarritoItem>> obtenerPorCliente(@PathVariable Long idCliente) {
-        List<CarritoItem> items = servicio.obtenerPorCliente(idCliente);
-        return ResponseEntity.ok(items);
+        return ResponseEntity.ok(servicio.obtenerPorCliente(idCliente));
     }
 
-    @Operation(summary = "Obtener un ítem del carrito por su ID")
+    @Operation(summary = "Obtener un Ã­tem del carrito por su ID")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Ítem encontrado"),
-        @ApiResponse(responseCode = "404", description = "Ítem no encontrado")
+        @ApiResponse(responseCode = "200", description = "Ãtem encontrado"),
+        @ApiResponse(responseCode = "404", description = "Ãtem no encontrado")
     })
     @GetMapping("/{id}")
     public ResponseEntity<CarritoItem> obtenerPorId(@PathVariable Long id) {
@@ -57,28 +57,29 @@ public class CarritoControlador {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Actualizar un ítem del carrito")
+    @Operation(summary = "Actualizar un Ã­tem del carrito")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Ítem actualizado correctamente"),
-        @ApiResponse(responseCode = "400", description = "Error de validación o datos incorrectos"),
-        @ApiResponse(responseCode = "404", description = "Ítem no encontrado")
+        @ApiResponse(responseCode = "200", description = "Ãtem actualizado correctamente"),
+        @ApiResponse(responseCode = "400", description = "Error de validaciÃ³n o datos incorrectos"),
+        @ApiResponse(responseCode = "404", description = "Ãtem no encontrado")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody CarritoItem item) {
-        if (servicio.obtenerPorId(id).isEmpty()) {
+    public ResponseEntity<?> actualizar(
+            @PathVariable Long id,
+            @RequestBody CarritoItem item,
+            @RequestHeader("Authorization") String token) {
+        if (servicio.obtenerPorId(id).isEmpty())
             return ResponseEntity.notFound().build();
-        }
         item.setId(id);
         try {
-            CarritoItem actualizado = servicio.actualizar(item);
-            return ResponseEntity.ok(actualizado);
+            return ResponseEntity.ok(servicio.actualizar(item, token));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @Operation(summary = "Eliminar un ítem del carrito por su ID")
-    @ApiResponse(responseCode = "204", description = "Ítem eliminado correctamente")
+    @Operation(summary = "Eliminar un Ã­tem del carrito por su ID")
+    @ApiResponse(responseCode = "204", description = "Ãtem eliminado correctamente")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         servicio.eliminar(id);
@@ -97,7 +98,6 @@ public class CarritoControlador {
     @ApiResponse(responseCode = "200", description = "Cantidad total obtenida")
     @GetMapping("/cliente/{idCliente}/total")
     public ResponseEntity<Integer> obtenerTotalCantidad(@PathVariable Long idCliente) {
-        int total = servicio.obtenerTotalCantidad(idCliente);
-        return ResponseEntity.ok(total);
+        return ResponseEntity.ok(servicio.obtenerTotalCantidad(idCliente));
     }
 }

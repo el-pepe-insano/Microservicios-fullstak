@@ -1,4 +1,4 @@
-package com.Mediexpress.CarritoDeCompras.model;
+ackage com.Mediexpress.CarritoDeCompras.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

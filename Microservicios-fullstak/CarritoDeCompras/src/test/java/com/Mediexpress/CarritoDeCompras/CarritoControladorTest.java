@@ -1,6 +1,7 @@
 package com.Mediexpress.CarritoDeCompras;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -16,13 +17,13 @@ import java.util.Optional;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
 import com.Mediexpress.CarritoDeCompras.controller.CarritoControlador;
 import com.Mediexpress.CarritoDeCompras.model.CarritoItem;
 import com.Mediexpress.CarritoDeCompras.service.CarritoServicio;
 
 @WebMvcTest(CarritoControlador.class)
 public class CarritoControladorTest {
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -32,12 +33,15 @@ public class CarritoControladorTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    private static final String TOKEN = "Bearer test-token";
+
     @Test
     void testAgregarItem() throws Exception {
         CarritoItem item = new CarritoItem(1L, 1L, 1L, 3);
-        Mockito.when(servicio.agregar(any(CarritoItem.class))).thenReturn(item);
+        Mockito.when(servicio.agregar(any(CarritoItem.class), eq(TOKEN))).thenReturn(item);
 
         mockMvc.perform(post("/api/v1/carrito")
+                        .header("Authorization", TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(item)))
                 .andExpect(status().isCreated())
@@ -68,9 +72,10 @@ public class CarritoControladorTest {
     void testActualizarItem() throws Exception {
         CarritoItem item = new CarritoItem(1L, 1L, 1L, 2);
         Mockito.when(servicio.obtenerPorId(1L)).thenReturn(Optional.of(item));
-        Mockito.when(servicio.actualizar(any(CarritoItem.class))).thenReturn(item);
+        Mockito.when(servicio.actualizar(any(CarritoItem.class), eq(TOKEN))).thenReturn(item);
 
         mockMvc.perform(put("/api/v1/carrito/1")
+                        .header("Authorization", TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(item)))
                 .andExpect(status().isOk())
@@ -97,6 +102,4 @@ public class CarritoControladorTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("10"));
     }
-} 
-
-
+}

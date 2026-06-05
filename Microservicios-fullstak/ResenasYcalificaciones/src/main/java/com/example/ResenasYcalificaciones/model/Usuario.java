@@ -1,14 +1,10 @@
-package com.example.ResenasYcalificaciones.model;
-
+﻿package com.example.ResenasYcalificaciones.model;
 import lombok.Data;
-
 @Data
 public class Usuario {
-    private Long idUsuario;
-    private String nombreUsuario;
+    private Long id;
+    private String nombre;
     private String correo;
     private String rol;
-    // getters y setters
+    private boolean activo;
 }
-
-
